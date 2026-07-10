@@ -1,0 +1,212 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;700&display=swap');
+
+/* ===== Dark Theme (default) ===== */
+:root {
+  color-scheme: dark;
+  --ryn-bg:              #0A0614;
+  --ryn-card:            #130D2E;
+  --ryn-glass:           rgba(19, 13, 46, 0.65);
+  --ryn-glass-border:    rgba(139, 92, 246, 0.18);
+  --ryn-gradient:        radial-gradient(ellipse at 18% 0%, #2D1060 0%, #0A0614 62%);
+  --ryn-text:            #e2e8f0;
+  --ryn-text-secondary:  #94a3b8;
+  --ryn-text-muted:      #64748b;
+  --ryn-border:          rgba(255, 255, 255, 0.07);
+  --ryn-border-strong:   rgba(255, 255, 255, 0.12);
+  --ryn-input:           #0A0614;
+  --ryn-tooltip:         #130D2E;
+  --ryn-red:             #ef4444;
+  --ryn-red-bg:          rgba(239, 68, 68, 0.1);
+  --ryn-green:           #22c55e;
+  --ryn-green-bg:         rgba(34, 197, 94, 0.1);
+}
+
+/* ===== Light Theme ===== */
+:root.light {
+  color-scheme: light;
+  --ryn-bg:              #F8F8FC;
+  --ryn-card:            #FFFFFF;
+  --ryn-glass:           rgba(255, 255, 255, 0.72);
+  --ryn-glass-border:    rgba(139, 92, 246, 0.14);
+  --ryn-gradient:        radial-gradient(ellipse at 18% 0%, #ede9fe 0%, #F8F8FC 68%);
+  --ryn-text:            #1e1e2e;
+  --ryn-text-secondary:  #4b5563;
+  --ryn-text-muted:      #9ca3af;
+  --ryn-border:          #ECECF3;
+  --ryn-border-strong:   #d1d5db;
+  --ryn-input:           #F8F8FC;
+  --ryn-tooltip:         #FFFFFF;
+  --ryn-red:             #dc2626;
+  --ryn-red-bg:          rgba(220, 38, 38, 0.08);
+  --ryn-green:           #16a34a;
+  --ryn-green-bg:         rgba(22, 163, 74, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+
+body {
+  background: var(--ryn-gradient);
+  background-attachment: fixed;
+  background-size: cover;
+  color: var(--ryn-text);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.15);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.35);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Font classes */
+.font-number {
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* Recharts Tooltip Styling Override */
+.recharts-default-tooltip {
+  background-color: var(--ryn-tooltip) !important;
+  border: 1px solid var(--ryn-border) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
+}
+
+:root.light .recharts-tooltip-label,
+:root.light .recharts-tooltip-item {
+  color: #1e1e2e !important;
+}
+
+/* Highlight elements */
+input, select, textarea {
+  outline: none;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+:root.light input:focus, :root.light select:focus, :root.light textarea:focus {
+  border-color: rgba(139, 92, 246, 0.35) !important;
+}
+
+/* ===== Mobile Bottom Nav ===== */
+.ryn-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 64px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: var(--ryn-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--ryn-border);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.ryn-bottom-nav button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  color: var(--ryn-text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ryn-bottom-nav button.active {
+  color: #8B5CF6;
+}
+
+.ryn-bottom-nav button.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 3px;
+  background: #8B5CF6;
+  border-radius: 0 0 3px 3px;
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.6);
+}
+
+.ryn-bottom-nav .nav-badge {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  font-size: 9px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  color: #fff;
+}
+
+/* Mobile touch scrolling */
+@media (max-width: 768px) {
+  body {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevent iOS zoom on input focus */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
