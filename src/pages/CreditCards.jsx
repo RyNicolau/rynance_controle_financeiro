@@ -80,12 +80,12 @@ function CardVisual({ card, spent, onClick, isSelected }) {
   const pct = card.limit > 0 ? Math.min((spent / card.limit) * 100, 100) : 0;
   const barColor = pct > 90 ? "#ef4444" : pct > 70 ? "#fb923c" : "#22c55e";
   return (
-    <div onClick={onClick} style={{ cursor: "pointer", borderRadius: "20px", padding: "24px", background: color.gradient, minWidth: "280px", maxWidth: "320px", width: "100%", position: "relative", overflow: "hidden", boxShadow: isSelected ? "0 0 0 3px #fff, 0 0 0 5px #8B5CF6, 0 20px 40px rgba(0,0,0,0.4)" : "0 8px 32px rgba(0,0,0,0.3)", transition: "all 0.2s ease", transform: isSelected ? "translateY(-4px)" : "none", userSelect: "none", flexShrink: 0, scrollSnapAlign: "start" }}>
+    <div onClick={onClick} style={{ cursor: "pointer", borderRadius: "20px", padding: "24px", background: color.gradient, minWidth: "280px", maxWidth: "320px", width: "100%", position: "relative", isolation: "isolate", overflow: "hidden", boxShadow: isSelected ? "0 0 0 3px #fff, 0 0 0 5px #8B5CF6, 0 20px 40px rgba(0,0,0,0.4)" : "0 8px 32px rgba(0,0,0,0.3)", transition: "all 0.2s ease", transform: isSelected ? "translateY(-4px)" : "none", userSelect: "none", flexShrink: 0, scrollSnapAlign: "start" }}>
       <div style={{ position: "absolute", top: -30, right: -30, width: 120, height: 120, borderRadius: "50%", background: "rgba(255,255,255,0.06)" }} />
       <div style={{ position: "absolute", top: 20, right: -50, width: 160, height: 160, borderRadius: "50%", background: "rgba(255,255,255,0.04)" }} />
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "32px", position: "relative" }}>
         <div style={{ fontSize: "14px", fontWeight: 700, color: "rgba(255,255,255,0.9)", letterSpacing: "0.5px" }}>{card.name}</div>
-        <svg width="36" height="24" viewBox="0 0 36 24" style={{ opacity: 0.8 }}>
+        <svg width="36" height="24" viewBox="0 0 36 24" style={{ opacity: 0.8, position: "relative", zIndex: 2, pointerEvents: "none" }}>
           <circle cx="14" cy="12" r="10" fill="rgba(255,255,255,0.5)" />
           <circle cx="22" cy="12" r="10" fill="rgba(255,255,255,0.3)" />
         </svg>
@@ -479,9 +479,9 @@ export default function CreditCards({ user }) {
       )}
 
       {cards.length > 0 && (
-        <div style={{ display: "flex", gap: "20px", overflowX: "auto", paddingBottom: "12px", marginBottom: "28px", WebkitOverflowScrolling: "touch", scrollSnapType: "x mandatory" }}>
+        <div style={{ display: "flex", gap: "20px", overflowX: "auto", padding: "12px 12px 16px 12px", margin: "-12px -12px 18px -12px", position: "relative", zIndex: 1, WebkitOverflowScrolling: "touch", scrollSnapType: "x mandatory" }}>
           {cards.map((card) => (
-            <div key={card.id} style={{ position: "relative" }}>
+            <div key={card.id} style={{ position: "relative", scrollSnapAlign: "start", flexShrink: 0 }}>
               <CardVisual card={card} spent={getCardMonthlySpent(card.id)} onClick={() => setSelectedCardId(card.id === selectedCardId ? null : card.id)} isSelected={selectedCardId === card.id} />
               <div style={{ display: "flex", gap: "6px", marginTop: "10px", justifyContent: "center" }}>
                 <button onClick={() => triggerImport(card.id)} style={{ flex: 1, padding: "7px 12px", background: "rgba(139,92,246,0.15)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: "8px", color: "#8B5CF6", fontSize: "12px", fontWeight: 600, cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}>
