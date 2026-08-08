@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import useIsMobile from "./hooks/useIsMobile";
 import Sidebar from "./components/Sidebar";
 import Dashboard from "./pages/Dashboard";
 import Transactions from "./pages/Transactions";
@@ -241,6 +240,7 @@ export default function App() {
     mainContent: {
       marginLeft: isMobile ? 0 : "220px",
       paddingTop: isMobile ? "60px" : 0,
+      paddingBottom: isMobile ? "70px" : 0,
       flex: 1,
       minWidth: 0,
       backgroundColor: "var(--ryn-bg)"
@@ -337,7 +337,7 @@ export default function App() {
           </div>
 
           {/* Avatar — abre Configurações */}
-          <div onClick={() => { setCurrentTab("settings"); }}
+          <div onClick={() => { handleSetTab("settings"); }}
             style={avatarStyle}
             onMouseEnter={e => e.currentTarget.style.borderColor = "#8B5CF6"}
             onMouseLeave={e => e.currentTarget.style.borderColor = "rgba(139,92,246,0.4)"}

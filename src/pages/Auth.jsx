@@ -293,12 +293,6 @@ export default function Auth({ onLogin }) {
     setForm({ name: "", email: "", password: "", confirm: "", invite: "" });
   };
 
-  const demoFill = () => {
-    setMode("login");
-    setForm((f) => ({ ...f, email: "demo@rynance.com", password: "demo123" }));
-    setError("");
-  };
-
   return (
     <>
       <style>{`
@@ -331,11 +325,6 @@ export default function Auth({ onLogin }) {
           box-shadow: 0 10px 28px rgba(139,92,246,0.48) !important;
         }
         .ryn-auth-submit:active:not(:disabled) { transform: translateY(0); }
-        .ryn-demo-btn:hover {
-          background: rgba(139,92,246,0.12) !important;
-          border-color: rgba(139,92,246,0.45) !important;
-          color: #A78BFA !important;
-        }
         .ryn-switch-link {
           color: #8B5CF6; cursor: pointer; font-weight: 700;
           background: none; border: none; font-size: 14px;
@@ -635,34 +624,7 @@ export default function Auth({ onLogin }) {
               </form>
             )}
 
-            {/* Divider */}
-            <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "20px 0" }}>
-              <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.07)" }} />
-              <span style={{ fontSize: 11, color: "#64748b" }}>ou</span>
-              <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.07)" }} />
-            </div>
 
-            {/* Demo button */}
-            <button
-              type="button"
-              onClick={demoFill}
-              className="ryn-demo-btn"
-              style={{
-                width: "100%", padding: "11px 0",
-                borderRadius: 13, cursor: "pointer",
-                border: "1px solid rgba(139,92,246,0.22)",
-                background: "rgba(139,92,246,0.06)",
-                color: "#8B5CF6", fontSize: 14, fontWeight: 600,
-                fontFamily: "'Plus Jakarta Sans', sans-serif",
-                transition: "all 0.2s ease",
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 8
-              }}
-            >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="5 3 19 12 5 21 5 3"/>
-              </svg>
-              Acessar conta demo
-            </button>
 
             {/* Switch mode */}
             {mode !== "forgot" && (

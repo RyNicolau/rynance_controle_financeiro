@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import useIsMobile from "../hooks/useIsMobile";
 
 const PRESET_GRADIENTS = {
   "preset:purple": "linear-gradient(135deg, #a78bfa, #6d28d9)",
@@ -190,42 +189,6 @@ export default function Sidebar({
     }
   ];
 
-  // ═══════════════════════════════════════════
-  //  MOBILE: Bottom Tab Bar
-  // ═══════════════════════════════════════════
-  if (isMobile) {
-    return (
-      <nav className="ryn-bottom-nav">
-        {menuItems.map((item) => {
-          const isActive = currentTab === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => setCurrentTab(item.id)}
-              className={isActive ? "active" : ""}
-            >
-              <span style={{ display: "inline-flex", alignItems: "center" }}>
-                {item.icon}
-              </span>
-              <span>{item.shortLabel}</span>
-              {item.badge != null && (
-                <span
-                  className="nav-badge"
-                  style={{ backgroundColor: item.badgeColor || "#fb923c" }}
-                >
-                  {item.badge > 99 ? "99+" : item.badge}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </nav>
-    );
-  }
-
-  // ═══════════════════════════════════════════
-  //  DESKTOP: Original Sidebar
-  // ═══════════════════════════════════════════
   const styles = {
     sidebar: {
       width: "220px",
@@ -351,7 +314,8 @@ export default function Sidebar({
   };
 
   return (
-    <aside style={styles.sidebar}>
+    <>
+      <aside style={styles.sidebar}>
       <div>
         <div style={{ marginBottom: "2px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -553,5 +517,35 @@ export default function Sidebar({
         )}
       </div>
     </aside>
+
+      {/* Bottom Tab Bar no mobile */}
+      {isMobile && (
+        <nav className="ryn-bottom-nav">
+          {menuItems.map((item) => {
+            const isActive = currentTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setCurrentTab(item.id)}
+                className={isActive ? "active" : ""}
+              >
+                <span style={{ display: "inline-flex", alignItems: "center" }}>
+                  {item.icon}
+                </span>
+                <span>{item.shortLabel}</span>
+                {item.badge != null && (
+                  <span
+                    className="nav-badge"
+                    style={{ backgroundColor: item.badgeColor || "#fb923c" }}
+                  >
+                    {item.badge > 99 ? "99+" : item.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
+      )}
+    </>
   );
 }
