@@ -578,6 +578,69 @@ export default function Dashboard({
           </button>
         </div>
       </div>
+
+      {/* Botão flutuante + para novo lançamento */}
+      <button
+        onClick={() => {
+          // Sinaliza para a aba de transações abrir o formulário automaticamente
+          sessionStorage.setItem("ryn_open_form", "1");
+          setCurrentTab("transactions");
+        }}
+        title="Novo lançamento"
+        style={{
+          position: "fixed",
+          bottom: "28px",
+          right: "28px",
+          width: "52px",
+          height: "52px",
+          borderRadius: "50%",
+          background: "linear-gradient(135deg, #8B5CF6, #6D28D9)",
+          border: "none",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow: "0 4px 20px rgba(109, 40, 217, 0.5), 0 0 0 0 rgba(139,92,246,0.4)",
+          transition: "all 0.2s ease",
+          zIndex: 50,
+          animation: "fabPulse 2.5s ease-in-out infinite"
+        }}
+        onMouseEnter={e => {
+          e.currentTarget.style.transform = "scale(1.1)";
+          e.currentTarget.style.boxShadow = "0 6px 28px rgba(109, 40, 217, 0.65)";
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.transform = "scale(1)";
+          e.currentTarget.style.boxShadow = "0 4px 20px rgba(109, 40, 217, 0.5)";
+        }}
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+          stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </button>
+
+      {/* Tooltip do botão */}
+      <div style={{
+        position: "fixed",
+        bottom: "90px",
+        right: "22px",
+        backgroundColor: "var(--ryn-card)",
+        border: "1px solid var(--ryn-glass-border)",
+        borderRadius: "8px",
+        padding: "6px 12px",
+        fontSize: "12px",
+        fontWeight: 500,
+        color: "var(--ryn-text-secondary)",
+        pointerEvents: "none",
+        opacity: 0,
+        transition: "opacity 0.2s ease",
+        whiteSpace: "nowrap",
+        zIndex: 49
+      }} id="fab-tooltip">
+        Novo lançamento
+      </div>
     </div>
   );
 }

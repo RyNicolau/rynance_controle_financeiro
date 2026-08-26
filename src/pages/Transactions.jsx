@@ -69,6 +69,7 @@ export default function Transactions({
   const isMobile = useIsMobile();
   // Form visibility and fields
   const [formOpen, setFormOpen] = useState(false);
+  const [keepOpen, setKeepOpen] = useState(false);
   const [txType, setTxType] = useState("expense");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(() => {
@@ -93,6 +94,19 @@ export default function Transactions({
   const [hoveredTx, setHoveredTx] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [hoveredBtn, setHoveredBtn] = useState(null);
+
+  // Abrir formulário automaticamente se vier do botão do Dashboard
+  useEffect(() => {
+    const shouldOpen = sessionStorage.getItem("ryn_open_form");
+    if (shouldOpen === "1") {
+      setFormOpen(true);
+      sessionStorage.removeItem("ryn_open_form");
+      // Scroll suave para o formulário
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }, 100);
+    }
+  }, []);
 
   // Set default category when type changes (add form)
   useEffect(() => {
@@ -176,6 +190,7 @@ export default function Transactions({
       alert("Por favor, preencha todos os campos corretamente.");
       return;
     }
+
     const newTx = {
       id: "tx-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
       type: txType,
@@ -185,12 +200,23 @@ export default function Transactions({
       date,
       status: txStatus
     };
+
     const updated = [newTx, ...transactions];
     setTransactions(updated);
+    localStorage.setItem("pf_data_v1", JSON.stringify(updated));
+
+    // Limpar campos sempre
     setAmount("");
     setDescription("");
     setTxStatus("paid");
-    setFormOpen(false);
+    // Manter categoria e tipo — geralmente se repete
+    // Resetar data para hoje
+    setDate(new Date().toISOString().split("T")[0]);
+
+    // Fechar formulário apenas se não estiver no modo "salvar e adicionar outro"
+    if (!keepOpen) {
+      setFormOpen(false);
+    }
   };
 
   // Handle delete
@@ -815,14 +841,43 @@ export default function Transactions({
             </div>
           </div>
 
-          <button
-            type="submit"
-            onMouseEnter={() => setHoveredBtn("save")}
-            onMouseLeave={() => setHoveredBtn(null)}
-            style={styles.saveBtn(hoveredBtn === "save")}
-          >
-            Salvar Lançamento
-          </button>
+          <div style={{ display: "flex", gap: "10px", marginTop: "4px", flexWrap: "wrap" }}>
+            {/* Salvar e fechar */}
+            <button
+              type="submit"
+              onClick={() => setKeepOpen(false)}
+              onMouseEnter={() => setHoveredBtn("save")}
+              onMouseLeave={() => setHoveredBtn(null)}
+              style={styles.saveBtn(hoveredBtn === "save")}
+            >
+              Salvar Lançamento
+            </button>
+
+            {/* Salvar e adicionar outro */}
+            <button
+              type="submit"
+              onClick={() => setKeepOpen(true)}
+              onMouseEnter={() => setHoveredBtn("saveMore")}
+              onMouseLeave={() => setHoveredBtn(null)}
+              style={{
+                ...styles.saveBtn(hoveredBtn === "saveMore"),
+                backgroundColor: hoveredBtn === "saveMore" ? "rgba(139, 92, 246, 0.25)" : "rgba(139, 92, 246, 0.15)",
+                color: "#A78BFA",
+                border: "1px solid rgba(139, 92, 246, 0.35)",
+                boxShadow: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px"
+              }}
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Salvar e adicionar outro
+            </button>
+          </div>
         </form>
       </div>
 

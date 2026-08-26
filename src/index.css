@@ -210,3 +210,9 @@ input:focus, select:focus, textarea:focus {
   }
 }
 
+@keyframes fabPulse {
+  0%, 100% { box-shadow: 0 4px 20px rgba(109,40,217,0.5), 0 0 0 0 rgba(139,92,246,0.4); }
+  50%       { box-shadow: 0 4px 20px rgba(109,40,217,0.5), 0 0 0 8px rgba(139,92,246,0); }
+}
+
+

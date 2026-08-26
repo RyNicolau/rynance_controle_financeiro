@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import useIsMobile from "../hooks/useIsMobile";
 import { EXPENSE_CATEGORIES } from "../data/demoData";
 import { supabase } from "../lib/supabase";
 
@@ -206,17 +207,21 @@ function ImportModal({ preview, onConfirm, onClose }) {
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "32px 90px 1fr 130px 100px", gap: "8px", padding: "10px 24px", fontSize: "11px", fontWeight: 600, color: "var(--ryn-text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", borderBottom: "1px solid var(--ryn-border)" }}>
-          <button onClick={toggleAll} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", padding: 0 }}>
-            <div style={{ width: 16, height: 16, borderRadius: 4, border: "2px solid #8B5CF6", backgroundColor: Object.values(selections).every(Boolean) ? "#8B5CF6" : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              {Object.values(selections).every(Boolean) && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>}
-            </div>
-          </button>
-          <span>Data</span><span>Descrição</span><span>Categoria</span><span style={{ textAlign: "right" }}>Valor</span>
-        </div>
-        <div style={{ overflowY: "auto", flex: 1 }}>
+        {/* Wrapper scroll */}
+        <div style={{ overflowX: "auto", overflowY: "auto", WebkitOverflowScrolling: "touch", flex: 1 }}>
+          {/* Header */}
+          <div style={{ display: "grid", gridTemplateColumns: "32px 90px 1fr 130px 100px", gap: "8px", padding: "10px 24px", fontSize: "11px", fontWeight: 600, color: "var(--ryn-text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", borderBottom: "1px solid var(--ryn-border)", minWidth: "480px" }}>
+            <button onClick={toggleAll} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", padding: 0 }}>
+              <div style={{ width: 16, height: 16, borderRadius: 4, border: "2px solid #8B5CF6", backgroundColor: Object.values(selections).every(Boolean) ? "#8B5CF6" : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {Object.values(selections).every(Boolean) && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>}
+              </div>
+            </button>
+            <span>Data</span><span>Descrição</span><span>Categoria</span><span style={{ textAlign: "right" }}>Valor</span>
+          </div>
+
+          {/* Rows com minWidth também */}
           {preview.transactions.map((tx) => (
-            <div key={tx.fitid} style={{ display: "grid", gridTemplateColumns: "32px 90px 1fr 130px 100px", gap: "8px", padding: "10px 24px", alignItems: "center", borderBottom: "1px solid var(--ryn-border)", opacity: selections[tx.fitid] ? 1 : 0.4, transition: "opacity 0.15s" }}>
+            <div key={tx.fitid} style={{ display: "grid", gridTemplateColumns: "32px 90px 1fr 130px 100px", gap: "8px", padding: "10px 24px", alignItems: "center", borderBottom: "1px solid var(--ryn-border)", opacity: selections[tx.fitid] ? 1 : 0.4, transition: "opacity 0.15s", minWidth: "480px" }}>
               <button onClick={() => toggle(tx.fitid)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", padding: 0 }}>
                 <div style={{ width: 16, height: 16, borderRadius: 4, border: `2px solid ${selections[tx.fitid] ? "#8B5CF6" : "var(--ryn-border-strong)"}`, backgroundColor: selections[tx.fitid] ? "#8B5CF6" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}>
                   {selections[tx.fitid] && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>}
@@ -252,6 +257,7 @@ function ImportModal({ preview, onConfirm, onClose }) {
 }
 
 export default function CreditCards({ user }) {
+  const isMobile = useIsMobile();
   const [cards, setCards] = useState([]);
   const [ccTx, setCcTx] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -433,8 +439,8 @@ export default function CreditCards({ user }) {
   const fmt = (v) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   const s = {
-    container: { padding: "32px", minHeight: "100vh", backgroundColor: "var(--ryn-bg)", fontFamily: "'Plus Jakarta Sans', sans-serif" },
-    title: { fontSize: "30px", fontWeight: 800, background: "linear-gradient(135deg, #A78BFA 0%, #8B5CF6 50%, #6D28D9 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", marginBottom: "4px", letterSpacing: "-0.5px" },
+    container: { padding: isMobile ? "20px 16px 80px" : "32px", minHeight: "100vh", backgroundColor: "var(--ryn-bg)", fontFamily: "'Plus Jakarta Sans', sans-serif" },
+    title: { fontSize: isMobile ? "24px" : "30px", fontWeight: 800, background: "linear-gradient(135deg, #A78BFA 0%, #8B5CF6 50%, #6D28D9 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", marginBottom: "4px", letterSpacing: "-0.5px" },
     subtitle: { fontSize: "14px", color: "var(--ryn-text-secondary)" },
     glass: { backgroundColor: "var(--ryn-glass)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid var(--ryn-glass-border)", borderRadius: "16px", boxShadow: "0 2px 12px rgba(0,0,0,0.12)" }
   };
@@ -509,14 +515,14 @@ export default function CreditCards({ user }) {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
               </button>
             </div>
-            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", width: isMobile ? "100%" : "auto" }}>
               <input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Buscar transação..."
-                style={{ padding: "7px 12px", backgroundColor: "rgba(139,92,246,0.06)", border: "1.5px solid var(--ryn-border-strong)", borderRadius: "8px", color: "var(--ryn-text)", fontSize: "13px", fontFamily: "'Plus Jakarta Sans', sans-serif", outline: "none", width: "180px" }}
+                style={{ padding: "7px 12px", backgroundColor: "rgba(139,92,246,0.06)", border: "1.5px solid var(--ryn-border-strong)", borderRadius: "8px", color: "var(--ryn-text)", fontSize: "13px", fontFamily: "'Plus Jakarta Sans', sans-serif", outline: "none", width: isMobile ? "100%" : "180px" }}
                 onFocus={e => e.target.style.borderColor = "#8B5CF6"}
                 onBlur={e => e.target.style.borderColor = "var(--ryn-border-strong)"}
               />
               <select value={filterCat} onChange={(e) => setFilterCat(e.target.value)}
-                style={{ padding: "7px 12px", backgroundColor: "rgba(139,92,246,0.06)", border: "1.5px solid var(--ryn-border-strong)", borderRadius: "8px", color: "var(--ryn-text)", fontSize: "13px", fontFamily: "'Plus Jakarta Sans', sans-serif", outline: "none", cursor: "pointer" }}>
+                style={{ padding: "7px 12px", backgroundColor: "rgba(139,92,246,0.06)", border: "1.5px solid var(--ryn-border-strong)", borderRadius: "8px", color: "var(--ryn-text)", fontSize: "13px", fontFamily: "'Plus Jakarta Sans', sans-serif", outline: "none", cursor: "pointer", width: isMobile ? "100%" : "auto" }}>
                 <option value="Todas">Todas as categorias</option>
                 {EXPENSE_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
@@ -537,7 +543,7 @@ export default function CreditCards({ user }) {
             ))}
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: "20px", alignItems: "start" }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 320px", gap: "20px", alignItems: "start" }}>
             <div style={{ ...s.glass, overflow: "hidden" }}>
               {cardTx.length === 0 ? (
                 <div style={{ padding: "48px 24px", textAlign: "center" }}>
@@ -546,12 +552,12 @@ export default function CreditCards({ user }) {
                   <div style={{ fontSize: "13px", color: "var(--ryn-text-muted)" }}>Importe um arquivo OFX para visualizar</div>
                 </div>
               ) : (
-                <div style={{ overflowX: "auto" }}>
-                  <div style={{ display: "grid", gridTemplateColumns: "90px 1fr 120px 100px", gap: "12px", padding: "12px 20px", fontSize: "11px", fontWeight: 600, color: "var(--ryn-text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", borderBottom: "1px solid var(--ryn-border)", minWidth: "440px" }}>
+                <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "90px minmax(120px, 1fr) 110px 100px", gap: "12px", padding: "12px 20px", fontSize: "11px", fontWeight: 600, color: "var(--ryn-text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", borderBottom: "1px solid var(--ryn-border)", minWidth: "420px" }}>
                     <span>Data</span><span>Descrição</span><span>Categoria</span><span style={{ textAlign: "right" }}>Valor</span>
                   </div>
                   {cardTx.map((tx) => (
-                    <div key={tx.id} style={{ display: "grid", gridTemplateColumns: "90px 1fr 120px 100px", gap: "12px", padding: "12px 20px", alignItems: "center", borderBottom: "1px solid var(--ryn-border)", transition: "background 0.15s", minWidth: "440px" }}
+                    <div key={tx.id} style={{ display: "grid", gridTemplateColumns: "90px minmax(120px, 1fr) 110px 100px", gap: "12px", padding: "12px 20px", alignItems: "center", borderBottom: "1px solid var(--ryn-border)", transition: "background 0.15s", minWidth: "420px" }}
                       onMouseEnter={e => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.04)"}
                       onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}>
                       <span style={{ fontSize: "12px", color: "var(--ryn-text-secondary)", fontFamily: "'IBM Plex Mono', monospace" }}>{tx.date.split("-").reverse().join("/")}</span>
