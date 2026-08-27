@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import useIsMobile from "../hooks/useIsMobile";
+import { useWindowSize } from "../hooks/useWindowSize";
 import { INCOME_CATEGORIES, EXPENSE_CATEGORIES } from "../data/demoData";
 
 const MONTHS = [
@@ -47,6 +47,26 @@ const CATEGORY_ICONS = {
   "Presente": "💝"
 };
 
+// Retorna a data local no formato YYYY-MM-DD (sem bug de fuso horário)
+const todayLocal = () => {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+};
+
+// Retorna a data padrão para o formulário baseada no mês e ano selecionados
+const getDefaultDateForMonth = (monthIdx, year) => {
+  const today = new Date();
+  if (today.getMonth() === monthIdx && today.getFullYear() === year) {
+    return todayLocal();
+  }
+  const yyyy = year;
+  const mm = String(monthIdx + 1).padStart(2, "0");
+  return `${yyyy}-${mm}-01`;
+};
+
 // Helper functions for dates
 const getMonthFromDate = (dateStr) => {
   const parts = dateStr.split("-");
@@ -66,16 +86,18 @@ export default function Transactions({
   setCurrentMonth,
   currentYear
 }) {
-  const isMobile = useIsMobile();
+  const { isMobile } = useWindowSize();
   // Form visibility and fields
   const [formOpen, setFormOpen] = useState(false);
   const [keepOpen, setKeepOpen] = useState(false);
   const [txType, setTxType] = useState("expense");
   const [amount, setAmount] = useState("");
-  const [date, setDate] = useState(() => {
-    const today = new Date();
-    return today.toISOString().split("T")[0];
-  });
+  const [date, setDate] = useState(() => getDefaultDateForMonth(currentMonth, currentYear));
+
+  // Sincronizar campo de data quando o mês ou ano selecionado mudar
+  useEffect(() => {
+    setDate(getDefaultDateForMonth(currentMonth, currentYear));
+  }, [currentMonth, currentYear]);
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
   const [txStatus, setTxStatus] = useState("paid");
@@ -173,6 +195,10 @@ export default function Transactions({
       return t;
     });
     setTransactions(updated);
+    const txMonth = getMonthFromDate(editDate);
+    if (setCurrentMonth && txMonth !== currentMonth) {
+      setCurrentMonth(txMonth);
+    }
     setEditingTx(null);
   };
 
@@ -205,13 +231,18 @@ export default function Transactions({
     setTransactions(updated);
     localStorage.setItem("pf_data_v1", JSON.stringify(updated));
 
+    // Se o lançamento for feito para outro mês, mudar automaticamente a visualização
+    const txMonth = getMonthFromDate(date);
+    if (setCurrentMonth && txMonth !== currentMonth) {
+      setCurrentMonth(txMonth);
+    }
+
     // Limpar campos sempre
     setAmount("");
     setDescription("");
     setTxStatus("paid");
-    // Manter categoria e tipo — geralmente se repete
-    // Resetar data para hoje
-    setDate(new Date().toISOString().split("T")[0]);
+    // Resetar data respeitando o mês selecionado
+    setDate(getDefaultDateForMonth(txMonth, currentYear));
 
     // Fechar formulário apenas se não estiver no modo "salvar e adicionar outro"
     if (!keepOpen) {
@@ -881,27 +912,107 @@ export default function Transactions({
         </form>
       </div>
 
-      {/* Month Selector Pills */}
-      <div style={styles.pillsContainer}>
-        {MONTHS.map((month, idx) => {
-          const isActive = currentMonth === idx;
-          const isHovered = hoveredPill === idx;
-          return (
-            <button
-              key={idx}
-              onClick={() => {
-                setCurrentMonth(idx);
-                setConfirmDeleteId(null);
-              }}
-              onMouseEnter={() => setHoveredPill(idx)}
-              onMouseLeave={() => setHoveredPill(null)}
-              style={styles.pill(isActive, isHovered)}
-            >
-              {month}
-            </button>
-          );
-        })}
-      </div>
+      {/* Month Selector */}
+      {isMobile ? (
+        /* ── Seletor mobile: setas + dropdown ── */
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          marginBottom: "20px"
+        }}>
+          {/* Seta esquerda */}
+          <button
+            onClick={() => {
+              if (currentMonth === 0) setCurrentMonth(11);
+              else setCurrentMonth(currentMonth - 1);
+            }}
+            style={{
+              width: 36, height: 36, borderRadius: "50%",
+              border: "1px solid var(--ryn-border-strong)",
+              background: "none", cursor: "pointer",
+              color: "var(--ryn-text-secondary)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              flexShrink: 0
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
+
+          {/* Dropdown de mês */}
+          <select
+            value={currentMonth}
+            onChange={(e) => setCurrentMonth(Number(e.target.value))}
+            style={{
+              flex: 1,
+              padding: "8px 12px",
+              backgroundColor: "var(--ryn-glass)",
+              border: "1px solid rgba(139, 92, 246, 0.3)",
+              borderRadius: "10px",
+              color: "var(--ryn-text)",
+              fontSize: "14px",
+              fontWeight: 600,
+              fontFamily: "'Plus Jakarta Sans', sans-serif",
+              outline: "none",
+              cursor: "pointer",
+              textAlign: "center",
+              appearance: "none",
+              WebkitAppearance: "none",
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B5CF6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "right 12px center",
+              paddingRight: "32px"
+            }}
+          >
+            {MONTHS.map((month, idx) => (
+              <option key={idx} value={idx}>{month} {currentYear}</option>
+            ))}
+          </select>
+
+          {/* Seta direita */}
+          <button
+            onClick={() => {
+              if (currentMonth === 11) setCurrentMonth(0);
+              else setCurrentMonth(currentMonth + 1);
+            }}
+            style={{
+              width: 36, height: 36, borderRadius: "50%",
+              border: "1px solid var(--ryn-border-strong)",
+              background: "none", cursor: "pointer",
+              color: "var(--ryn-text-secondary)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              flexShrink: 0
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </button>
+        </div>
+      ) : (
+        /* ── Seletor desktop: pills originais ── */
+        <div style={styles.pillsContainer}>
+          {MONTHS.map((month, idx) => {
+            const isActive = idx === currentMonth;
+            const isHovered = hoveredPill === idx;
+            return (
+              <button
+                key={idx}
+                onMouseEnter={() => setHoveredPill(idx)}
+                onMouseLeave={() => setHoveredPill(null)}
+                onClick={() => setCurrentMonth(idx)}
+                style={styles.pill(isActive, isHovered)}
+              >
+                {month}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Monthly Summary */}
       <div style={styles.summaryCard}>

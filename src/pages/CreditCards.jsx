@@ -32,6 +32,19 @@ const AUTO_CATEGORIES = [
   { pattern: /roupa|moda|zara|riachuelo|renner|c&a|hering|lojas/i, cat: "Vestuário" },
 ];
 
+const fixEncoding = (str) => {
+  if (!str) return str;
+  return str
+    .replace(/Ã©/g, "é")
+    .replace(/Ã£/g, "ã")
+    .replace(/Ã§/g, "ç")
+    .replace(/Ã¡/g, "á")
+    .replace(/Ãª/g, "ê")
+    .replace(/Ã³/g, "ó")
+    .replace(/Ãº/g, "ú")
+    .replace(/Ã/g, "À");
+};
+
 const autoCategory = (desc) => {
   for (const { pattern, cat } of AUTO_CATEGORIES) {
     if (pattern.test(desc)) return cat;
@@ -505,14 +518,14 @@ export default function CreditCards({ user }) {
 
       {selectedCard && (
         <>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "12px", marginBottom: "20px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <button onClick={prevMonth} style={{ width: 32, height: 32, borderRadius: "50%", border: "1px solid var(--ryn-border-strong)", background: "none", cursor: "pointer", color: "var(--ryn-text-secondary)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: "center", justifyContent: "space-between", gap: "16px", marginBottom: "20px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", width: isMobile ? "100%" : "auto" }}>
+              <button onClick={prevMonth} style={{ width: 36, height: 36, borderRadius: "50%", border: "1px solid var(--ryn-border-strong)", background: "none", cursor: "pointer", color: "var(--ryn-text-secondary)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
               </button>
-              <span style={{ fontSize: "15px", fontWeight: 700, color: "var(--ryn-text)", minWidth: "160px", textAlign: "center" }}>{MONTHS[viewMonth]} {viewYear}</span>
-              <button onClick={nextMonth} style={{ width: 32, height: 32, borderRadius: "50%", border: "1px solid var(--ryn-border-strong)", background: "none", cursor: "pointer", color: "var(--ryn-text-secondary)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              <span style={{ fontSize: "16px", fontWeight: 700, color: "var(--ryn-text)", minWidth: "160px", textAlign: "center" }}>{MONTHS[viewMonth]} {viewYear}</span>
+              <button onClick={nextMonth} style={{ width: 36, height: 36, borderRadius: "50%", border: "1px solid var(--ryn-border-strong)", background: "none", cursor: "pointer", color: "var(--ryn-text-secondary)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
               </button>
             </div>
             <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", width: isMobile ? "100%" : "auto" }}>
@@ -529,16 +542,16 @@ export default function CreditCards({ user }) {
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "12px", marginBottom: "20px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(auto-fit, minmax(160px, 1fr))", gap: "12px", marginBottom: "20px" }}>
             {[
               { label: "Total Débito", value: fmt(totalDebit), color: "#ef4444" },
               { label: "Total Crédito", value: fmt(totalCredit), color: "#22c55e" },
               { label: "Lançamentos", value: cardTx.length, color: "#8B5CF6" },
               { label: "Saldo do Mês", value: fmt(totalCredit - totalDebit), color: totalCredit - totalDebit >= 0 ? "#22c55e" : "#ef4444" }
             ].map((stat) => (
-              <div key={stat.label} style={{ ...s.glass, padding: "16px 18px" }}>
-                <div style={{ fontSize: "10px", color: "var(--ryn-text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "6px" }}>{stat.label}</div>
-                <div style={{ fontSize: "17px", fontWeight: 700, color: stat.color, fontFamily: "'IBM Plex Mono', monospace" }}>{stat.value}</div>
+              <div key={stat.label} style={{ ...s.glass, padding: "14px 16px" }}>
+                <div style={{ fontSize: "10px", color: "var(--ryn-text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "4px" }}>{stat.label}</div>
+                <div style={{ fontSize: isMobile ? "15px" : "17px", fontWeight: 700, color: stat.color, fontFamily: "'IBM Plex Mono', monospace" }}>{stat.value}</div>
               </div>
             ))}
           </div>
@@ -551,7 +564,58 @@ export default function CreditCards({ user }) {
                   <div style={{ fontSize: "15px", fontWeight: 600, color: "var(--ryn-text)", marginBottom: "6px" }}>Nenhuma transação neste mês</div>
                   <div style={{ fontSize: "13px", color: "var(--ryn-text-muted)" }}>Importe um arquivo OFX para visualizar</div>
                 </div>
+              ) : isMobile ? (
+                /* Visualização em lista otimizada para Mobile */
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px", padding: "12px" }}>
+                  {cardTx.map((tx) => {
+                    const isCredit = tx.type === "credit";
+                    const formattedDate = tx.date.split("-").reverse().join("/");
+                    const cleanDesc = fixEncoding(tx.description);
+                    return (
+                      <div
+                        key={tx.id}
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          padding: "12px 14px",
+                          backgroundColor: "rgba(255, 255, 255, 0.02)",
+                          border: "1px solid var(--ryn-border)",
+                          borderRadius: "12px",
+                          gap: "12px"
+                        }}
+                      >
+                        <div style={{ display: "flex", flexDirection: "column", gap: "4px", minWidth: 0, flex: 1 }}>
+                          <div
+                            style={{
+                              fontSize: "13px",
+                              fontWeight: 600,
+                              color: "var(--ryn-text)",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap"
+                            }}
+                            title={cleanDesc}
+                          >
+                            {cleanDesc}
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", fontSize: "11px", color: "var(--ryn-text-secondary)" }}>
+                            <span style={{ fontFamily: "'IBM Plex Mono', monospace" }}>{formattedDate}</span>
+                            <span>•</span>
+                            <span style={{ backgroundColor: "rgba(139,92,246,0.12)", color: "#8B5CF6", borderRadius: "6px", padding: "2px 6px", fontWeight: 500 }}>
+                              {tx.category}
+                            </span>
+                          </div>
+                        </div>
+                        <div style={{ fontSize: "13.5px", fontWeight: 700, fontFamily: "'IBM Plex Mono', monospace", color: isCredit ? "#22c55e" : "#ef4444", flexShrink: 0, textAlign: "right" }}>
+                          {isCredit ? "+" : "-"}{fmt(tx.amount)}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               ) : (
+                /* Visualização em tabela para Desktop */
                 <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
                   <div style={{ display: "grid", gridTemplateColumns: "90px minmax(120px, 1fr) 110px 100px", gap: "12px", padding: "12px 20px", fontSize: "11px", fontWeight: 600, color: "var(--ryn-text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", borderBottom: "1px solid var(--ryn-border)", minWidth: "420px" }}>
                     <span>Data</span><span>Descrição</span><span>Categoria</span><span style={{ textAlign: "right" }}>Valor</span>
@@ -561,7 +625,7 @@ export default function CreditCards({ user }) {
                       onMouseEnter={e => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.04)"}
                       onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}>
                       <span style={{ fontSize: "12px", color: "var(--ryn-text-secondary)", fontFamily: "'IBM Plex Mono', monospace" }}>{tx.date.split("-").reverse().join("/")}</span>
-                      <span style={{ fontSize: "13px", color: "var(--ryn-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={tx.description}>{tx.description}</span>
+                      <span style={{ fontSize: "13px", color: "var(--ryn-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={fixEncoding(tx.description)}>{fixEncoding(tx.description)}</span>
                       <span style={{ fontSize: "11px", backgroundColor: "rgba(139,92,246,0.08)", color: "#8B5CF6", borderRadius: "6px", padding: "2px 8px", fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "110px", display: "block" }}>{tx.category}</span>
                       <span style={{ fontSize: "13px", fontWeight: 600, color: tx.type === "credit" ? "#22c55e" : "#ef4444", fontFamily: "'IBM Plex Mono', monospace", textAlign: "right" }}>
                         {tx.type === "credit" ? "+" : "-"}{fmt(tx.amount)}
