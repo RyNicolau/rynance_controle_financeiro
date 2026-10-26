@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import useIsMobile from "../hooks/useIsMobile";
 import { EXPENSE_CATEGORIES } from "../data/demoData";
 import { supabase } from "../lib/supabase";
+import { formatMoneyInput, parseMoneyToNumber, handleMoneyInputChange } from "../utils/currencyMask";
 
 const MONTHS = [
   "Janeiro","Fevereiro","Março","Abril","Maio","Junho",
@@ -135,7 +136,7 @@ function AddCardModal({ onAdd, onClose }) {
   const [nameErr, setNameErr] = useState("");
   const handleSubmit = () => {
     if (!name.trim()) { setNameErr("Informe o nome do cartão"); return; }
-    onAdd({ name: name.trim(), color, limit: parseFloat(limit.replace(",", ".")) || 0 });
+    onAdd({ name: name.trim(), color, limit: parseMoneyToNumber(limit) });
     onClose();
   };
   return (
@@ -170,7 +171,7 @@ function AddCardModal({ onAdd, onClose }) {
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
             <label style={{ fontSize: "11px", fontWeight: 600, color: "var(--ryn-text-secondary)", textTransform: "uppercase", letterSpacing: "0.4px" }}>Limite (opcional)</label>
-            <input value={limit} onChange={(e) => setLimit(e.target.value)} placeholder="0,00"
+            <input value={limit} onChange={(e) => handleMoneyInputChange(e, setLimit)} placeholder="0,00" inputMode="numeric"
               style={{ padding: "11px 14px", backgroundColor: "rgba(139,92,246,0.06)", border: "1.5px solid var(--ryn-border-strong)", borderRadius: "10px", color: "var(--ryn-text)", fontSize: "14px", fontFamily: "'IBM Plex Mono', monospace", outline: "none" }}
               onFocus={e => e.target.style.borderColor = "#8B5CF6"}
               onBlur={e => e.target.style.borderColor = "var(--ryn-border-strong)"}

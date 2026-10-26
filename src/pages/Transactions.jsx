@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useWindowSize } from "../hooks/useWindowSize";
 import { INCOME_CATEGORIES, EXPENSE_CATEGORIES } from "../data/demoData";
+import { formatMoneyInput, parseMoneyToNumber, handleMoneyInputChange } from "../utils/currencyMask";
 
 const MONTHS = [
   "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
@@ -154,7 +155,7 @@ export default function Transactions({
   const handleOpenEdit = (tx) => {
     setEditingTx(tx);
     setEditType(tx.type);
-    setEditAmount(String(tx.amount));
+    setEditAmount(formatMoneyInput(tx.amount));
     setEditDate(tx.date);
     setEditCategory(tx.category);
     setEditDescription(tx.description);
@@ -169,10 +170,9 @@ export default function Transactions({
   // Save edited transaction
   const handleEditSave = (e) => {
     e.preventDefault();
+    const numericAmount = parseMoneyToNumber(editAmount);
     if (
-      !editAmount ||
-      isNaN(editAmount) ||
-      Number(editAmount) <= 0 ||
+      numericAmount <= 0 ||
       !editDescription ||
       !editDate ||
       !editCategory
@@ -185,7 +185,7 @@ export default function Transactions({
         return {
           ...t,
           type: editType,
-          amount: Number(editAmount),
+          amount: numericAmount,
           date: editDate,
           category: editCategory,
           description: editDescription,
@@ -205,10 +205,9 @@ export default function Transactions({
   // Handle add transaction save
   const handleSubmit = (e) => {
     e.preventDefault();
+    const numericAmount = parseMoneyToNumber(amount);
     if (
-      !amount ||
-      isNaN(amount) ||
-      Number(amount) <= 0 ||
+      numericAmount <= 0 ||
       !description ||
       !date ||
       !category
@@ -220,7 +219,7 @@ export default function Transactions({
     const newTx = {
       id: "tx-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
       type: txType,
-      amount: Number(amount),
+      amount: numericAmount,
       category,
       description,
       date,
@@ -806,13 +805,12 @@ export default function Transactions({
             <div style={styles.inputGroup}>
               <label style={styles.label}>Valor (R$)</label>
               <input
-                type="number"
-                step="0.01"
-                min="0.01"
+                type="text"
+                inputMode="numeric"
                 placeholder="0,00"
                 required
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={(e) => handleMoneyInputChange(e, setAmount)}
                 style={styles.input}
               />
             </div>
@@ -1414,12 +1412,12 @@ export default function Transactions({
                 <div style={styles.inputGroup}>
                   <label style={styles.label}>Valor (R$)</label>
                   <input
-                    type="number"
-                    step="0.01"
-                    min="0.01"
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="0,00"
                     required
                     value={editAmount}
-                    onChange={(e) => setEditAmount(e.target.value)}
+                    onChange={(e) => handleMoneyInputChange(e, setEditAmount)}
                     style={styles.input}
                   />
                 </div>

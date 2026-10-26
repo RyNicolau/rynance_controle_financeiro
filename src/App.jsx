@@ -7,6 +7,7 @@ import Budget from "./pages/Budget";
 import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
 import CreditCards from "./pages/CreditCards";
+import Subscriptions from "./pages/Subscriptions";
 import { demoTransactions } from "./data/demoData";
 import { useWindowSize } from "./hooks/useWindowSize";
 import { supabase } from "./lib/supabase";
@@ -220,6 +221,8 @@ export default function App() {
         );
       case "cards":
         return <CreditCards user={user} />;
+      case "subscriptions":
+        return <Subscriptions user={user} />;
       default:
         return (
           <Dashboard

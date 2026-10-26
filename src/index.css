@@ -137,12 +137,18 @@ input:focus, select:focus, textarea:focus {
   align-items: center;
   justify-content: space-around;
   height: 64px;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding: 0 4px env(safe-area-inset-bottom, 0px);
   background: var(--ryn-glass);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-top: 1px solid var(--ryn-border);
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.ryn-bottom-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .ryn-bottom-nav button {
@@ -154,11 +160,12 @@ input:focus, select:focus, textarea:focus {
   background: none;
   border: none;
   color: var(--ryn-text-muted);
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 600;
   font-family: 'Plus Jakarta Sans', sans-serif;
   cursor: pointer;
-  padding: 6px 12px;
+  padding: 6px 6px;
+  flex-shrink: 0;
   border-radius: 10px;
   transition: all 0.2s ease;
   position: relative;

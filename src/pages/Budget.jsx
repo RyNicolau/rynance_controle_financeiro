@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import useIsMobile from "../hooks/useIsMobile";
 import { EXPENSE_CATEGORIES } from "../data/demoData";
+import { formatMoneyInput, parseMoneyToNumber, handleMoneyInputChange } from "../utils/currencyMask";
 
 const MONTHS = [
   "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
@@ -60,8 +61,8 @@ export default function Budget({
       .reduce((acc, curr) => acc + Number(curr.amount), 0);
 
   const handleSetBudget = (category) => {
-    const val = parseFloat(inputValue.replace(",", "."));
-    if (isNaN(val) || val < 0) {
+    const val = parseMoneyToNumber(inputValue);
+    if (val < 0) {
       setEditingCategory(null);
       setInputValue("");
       return;
@@ -543,12 +544,11 @@ export default function Budget({
                   <span style={{ color: "var(--ryn-text-secondary)", fontSize: "13px" }}>R$</span>
                   <input
                     autoFocus
-                    type="number"
-                    min="0"
-                    step="0.01"
+                    type="text"
+                    inputMode="numeric"
                     placeholder="0,00"
                     value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
+                    onChange={(e) => handleMoneyInputChange(e, setInputValue)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") handleSetBudget(category);
                       if (e.key === "Escape") {
@@ -585,7 +585,7 @@ export default function Budget({
                   <button
                     onClick={() => {
                       setEditingCategory(category);
-                      setInputValue(budget.toString());
+                      setInputValue(formatMoneyInput(budget));
                     }}
                     style={{ ...styles.actionBtn("green"), flex: 1 }}
                     onMouseEnter={(e) =>
