@@ -8,51 +8,34 @@ import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
 import CreditCards from "./pages/CreditCards";
 import Subscriptions from "./pages/Subscriptions";
-import { demoTransactions } from "./data/demoData";
 import { useWindowSize } from "./hooks/useWindowSize";
 import { supabase } from "./lib/supabase";
+import { PreferencesProvider, usePreferences } from "./contexts/PreferencesContext";
 
 const CURRENT_YEAR = new Date().getFullYear();
 
-export default function App() {
+const PRESET_GRADIENTS = {
+  "preset:purple":  "linear-gradient(135deg, #a78bfa, #6d28d9)",
+  "preset:blue":    "linear-gradient(135deg, #60a5fa, #2563eb)",
+  "preset:emerald": "linear-gradient(135deg, #34d399, #059669)",
+  "preset:sunset":  "linear-gradient(135deg, #fca5a5, #b91c1c)",
+  "preset:coral":   "linear-gradient(135deg, #f472b6, #db2777)"
+};
+
+function AppContent({ user, setUser, authReady, handleLogin }) {
   const { isMobile } = useWindowSize();
+  const { preferences, toggleHideValues, isDark, updatePreference } = usePreferences();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const [currentTab, setCurrentTab] = useState("dashboard");
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
+  const [transactions, setTransactions] = useState([]);
+  const [budgets, setBudgets] = useState({});
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   const handleSetTab = (tab) => {
     setCurrentTab(tab);
     setSidebarOpen(false);
-  };
-
-  const [user, setUser] = useState(null);
-  const [authReady, setAuthReady] = useState(false);
-
-  useEffect(() => {
-    // Verificar sessão existente
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        supabase.from("profiles").select("name").eq("id", session.user.id).maybeSingle()
-          .then(({ data: profile }) => {
-            setUser({
-              id: session.user.id,
-              email: session.user.email,
-              name: profile?.name || session.user.user_metadata?.name || "Usuário",
-              photo: session.user.user_metadata?.photo || ""
-            });
-          });
-      }
-      setAuthReady(true);
-    });
-
-    // Ouvir mudanças de auth
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session) setUser(null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const handleLogin = (userData) => {
-    setUser(userData);
   };
 
   const handleLogout = async () => {
@@ -83,10 +66,6 @@ export default function App() {
     }
   };
 
-  const [transactions, setTransactions] = useState([]);
-  const [budgets, setBudgets] = useState({});
-  const [dataLoaded, setDataLoaded] = useState(false);
-
   useEffect(() => {
     if (!user?.id) return;
 
@@ -105,26 +84,6 @@ export default function App() {
 
     loadData();
   }, [user?.id]);
-
-  // State to manage active page view
-  const [currentTab, setCurrentTab] = useState("dashboard");
-
-  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
-
-  const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem("ryn_theme");
-    return saved !== null ? saved === "dark" : true;
-  });
-
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.remove("light");
-      localStorage.setItem("ryn_theme", "dark");
-    } else {
-      document.documentElement.classList.add("light");
-      localStorage.setItem("ryn_theme", "light");
-    }
-  }, [darkMode]);
 
   const toggleStatus = async (id) => {
     const tx = transactions.find(t => t.id === id);
@@ -215,8 +174,6 @@ export default function App() {
             setBudgets={saveBudgets}
             user={user}
             updateUser={handleUpdateUser}
-            darkMode={darkMode}
-            setDarkMode={setDarkMode}
           />
         );
       case "cards":
@@ -248,14 +205,6 @@ export default function App() {
       minWidth: 0,
       backgroundColor: "var(--ryn-bg)"
     }
-  };
-
-  const PRESET_GRADIENTS = {
-    "preset:purple":  "linear-gradient(135deg, #a78bfa, #6d28d9)",
-    "preset:blue":    "linear-gradient(135deg, #60a5fa, #2563eb)",
-    "preset:emerald": "linear-gradient(135deg, #34d399, #059669)",
-    "preset:sunset":  "linear-gradient(135deg, #fca5a5, #b91c1c)",
-    "preset:coral":   "linear-gradient(135deg, #f472b6, #db2777)"
   };
 
   const avatarStyle = {
@@ -299,7 +248,6 @@ export default function App() {
 
   return (
     <div style={styles.layoutContainer}>
-
       {/* Mobile top bar */}
       {isMobile && (
         <div style={{
@@ -339,15 +287,40 @@ export default function App() {
             </span>
           </div>
 
-          {/* Avatar — abre Configurações */}
-          <div onClick={() => { handleSetTab("settings"); }}
-            style={avatarStyle}
-            onMouseEnter={e => e.currentTarget.style.borderColor = "#8B5CF6"}
-            onMouseLeave={e => e.currentTarget.style.borderColor = "rgba(139,92,246,0.4)"}
-          >
-            {(!user?.photo || user.photo.startsWith("preset:")) && (
-              <span>{user?.name ? user.name.charAt(0).toUpperCase() : "U"}</span>
-            )}
+          {/* Right side actions: Privacy Eye + Avatar */}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <button
+              onClick={toggleHideValues}
+              title={preferences.hide_values ? "Mostrar valores" : "Ocultar valores"}
+              style={{
+                background: "none", border: "none", cursor: "pointer",
+                color: preferences.hide_values ? "#8B5CF6" : "var(--ryn-text-muted)",
+                padding: "8px", display: "flex", alignItems: "center", justifyContent: "center",
+                borderRadius: "8px", transition: "all 0.2s"
+              }}
+            >
+              {preferences.hide_values ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                  <line x1="1" y1="1" x2="23" y2="23"/>
+                </svg>
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+              )}
+            </button>
+
+            {/* Avatar — abre Configurações */}
+            <div onClick={() => { handleSetTab("settings"); }}
+              style={avatarStyle}
+              onMouseEnter={e => e.currentTarget.style.borderColor = "#8B5CF6"}
+              onMouseLeave={e => e.currentTarget.style.borderColor = "rgba(139,92,246,0.4)"}
+            >
+              {(!user?.photo || user.photo.startsWith("preset:")) && (
+                <span>{user?.name ? user.name.charAt(0).toUpperCase() : "U"}</span>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -366,8 +339,8 @@ export default function App() {
         budgets={budgets}
         currentMonth={currentMonth}
         currentYear={CURRENT_YEAR}
-        darkMode={darkMode}
-        setDarkMode={setDarkMode}
+        darkMode={isDark}
+        setDarkMode={(val) => updatePreference("theme", val ? "dark" : "light")}
         user={user}
         onLogout={handleLogout}
         isMobile={isMobile}
@@ -376,5 +349,50 @@ export default function App() {
       />
       <main style={styles.mainContent}>{renderActivePage()}</main>
     </div>
+  );
+}
+
+export default function App() {
+  const [user, setUser] = useState(null);
+  const [authReady, setAuthReady] = useState(false);
+
+  useEffect(() => {
+    // Verificar sessão existente
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        supabase.from("profiles").select("name").eq("id", session.user.id).maybeSingle()
+          .then(({ data: profile }) => {
+            setUser({
+              id: session.user.id,
+              email: session.user.email,
+              name: profile?.name || session.user.user_metadata?.name || "Usuário",
+              photo: session.user.user_metadata?.photo || ""
+            });
+          });
+      }
+      setAuthReady(true);
+    });
+
+    // Ouvir mudanças de auth
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!session) setUser(null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogin = (userData) => {
+    setUser(userData);
+  };
+
+  return (
+    <PreferencesProvider userId={user?.id}>
+      <AppContent
+        user={user}
+        setUser={setUser}
+        authReady={authReady}
+        handleLogin={handleLogin}
+      />
+    </PreferencesProvider>
   );
 }

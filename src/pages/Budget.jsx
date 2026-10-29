@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import useIsMobile from "../hooks/useIsMobile";
 import { EXPENSE_CATEGORIES } from "../data/demoData";
 import { formatMoneyInput, parseMoneyToNumber, handleMoneyInputChange } from "../utils/currencyMask";
+import { usePreferences } from "../contexts/PreferencesContext";
+import { formatCurrency as formatCurrencyUtil } from "../utils/formatCurrency";
 
 const MONTHS = [
   "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
@@ -52,8 +54,14 @@ export default function Budget({
 
   const monthExpenses = monthTransactions.filter((t) => t.type === "expense");
 
+  const { preferences } = usePreferences();
+
   const formatCurrency = (val) =>
-    val.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    formatCurrencyUtil(val, {
+      hideValues: preferences.hide_values,
+      currency: preferences.currency,
+      locale: preferences.locale
+    });
 
   const getCategorySpending = (category) =>
     monthExpenses

@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import useIsMobile from "../hooks/useIsMobile";
+import { usePreferences } from "../contexts/PreferencesContext";
+import { formatCurrency as formatCurrencyUtil } from "../utils/formatCurrency";
 import {
   BarChart,
   Bar,
@@ -58,6 +60,7 @@ const useCountUp = (target, duration = 900) => {
 
 // Simple tooltip for the mini bar chart
 const MiniTooltip = ({ active, payload, label }) => {
+  const { preferences } = usePreferences();
   if (active && payload && payload.length) {
     const receitas = payload.find(p => p.dataKey === "Receitas")?.value || 0;
     const despesas = payload.find(p => p.dataKey === "Despesas")?.value || 0;
@@ -75,10 +78,10 @@ const MiniTooltip = ({ active, payload, label }) => {
           {label}
         </p>
         <p style={{ margin: 0, fontSize: "12px", color: "var(--ryn-green)", fontFamily: "'IBM Plex Mono', monospace", fontWeight: 700 }}>
-          + {receitas.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+          + {formatCurrencyUtil(receitas, { hideValues: preferences.hide_values, currency: preferences.currency, locale: preferences.locale })}
         </p>
         <p style={{ margin: "3px 0 0", fontSize: "12px", color: "var(--ryn-red)", fontFamily: "'IBM Plex Mono', monospace", fontWeight: 700 }}>
-          - {despesas.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+          - {formatCurrencyUtil(despesas, { hideValues: preferences.hide_values, currency: preferences.currency, locale: preferences.locale })}
         </p>
       </div>
     );
@@ -164,9 +167,15 @@ export default function Dashboard({
     .sort((a, b) => new Date(b.date + "T00:00:00") - new Date(a.date + "T00:00:00"))
     .slice(0, 6);
 
+  const { preferences } = usePreferences();
+
   // Format currency
   const formatCurrency = (val) =>
-    val.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    formatCurrencyUtil(val, {
+      hideValues: preferences.hide_values,
+      currency: preferences.currency,
+      locale: preferences.locale
+    });
 
   const styles = {
     container: {

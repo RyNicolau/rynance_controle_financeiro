@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import useIsMobile from "../hooks/useIsMobile";
+import { usePreferences } from "../contexts/PreferencesContext";
+import { formatCurrency as formatCurrencyUtil } from "../utils/formatCurrency";
 import {
   ComposedChart,
   Bar,
@@ -376,8 +378,14 @@ export default function Reports({
   const incomeChange = prevIncome > 0 ? ((monthlyIncomeTotal - prevIncome) / prevIncome) * 100 : 0;
   const expenseChange = prevExpense > 0 ? ((monthlyExpenseTotal - prevExpense) / prevExpense) * 100 : 0;
 
+  const { preferences } = usePreferences();
+
   const formatCurrency = (val) =>
-    val.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    formatCurrencyUtil(val, {
+      hideValues: preferences.hide_values,
+      currency: preferences.currency,
+      locale: preferences.locale
+    });
 
   const styles = {
     container: {
