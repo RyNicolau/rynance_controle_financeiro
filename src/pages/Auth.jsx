@@ -537,7 +537,7 @@ export default function Auth({ onLogin }) {
                 {words.map((w, i) => (
                   <span key={i} className="pal" style={{
                     display: "inline-block",
-                    marginRight: w === "finanças" ? 0 : "0.25em",
+                    marginRight: "0.25em",
                     color: w === "finanças" ? "transparent" : "#fff",
                     background: w === "finanças" ? "linear-gradient(135deg, #a78bfa, #8b5cf6)" : "none",
                     WebkitBackgroundClip: w === "finanças" ? "text" : "unset",
